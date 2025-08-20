@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lumiere - Descobrir Filmes e Séries de Qualidade</title>
+    <meta name="description" content="Descubra filmes, séries e mini-séries de alta qualidade com sugestões personalizadas" />
+    <meta name="author" content="Ruben Araujo" />
+    <link rel="icon" href="/lumiere-cinema-selection/lovable-uploads/6c5812a0-e28e-43e2-8bd4-409bf85df54b.png" type="image/png">
+
+    <meta property="og:title" content="Lumiere - Descobrir Filmes e Séries de Qualidade" />
+    <meta property="og:description" content="Descubra filmes, séries e mini-séries de alta qualidade com sugestões personalizadas" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/lumiere-cinema-selection/placeholder-og-image.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@project_lumiere" />
+    <meta name="twitter:image" content="/lumiere-cinema-selection/placeholder-og-image.png" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // https://github.com/rafgraph/spa-github-pages
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

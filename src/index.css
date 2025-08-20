@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Lumiere Design System - Cinema-inspired dark theme
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Dark cinema theme - always active */
+    --background: 220 13% 8%;
+    --foreground: 45 100% 95%;
+
+    --card: 220 13% 12%;
+    --card-foreground: 45 100% 95%;
+
+    --popover: 220 13% 12%;
+    --popover-foreground: 45 100% 95%;
+
+    --primary: 45 100% 65%;
+    --primary-foreground: 220 13% 8%;
+
+    --secondary: 220 13% 18%;
+    --secondary-foreground: 45 100% 95%;
+
+    --muted: 220 13% 15%;
+    --muted-foreground: 45 10% 70%;
+
+    --accent: 35 100% 60%;
+    --accent-foreground: 220 13% 8%;
+
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 45 100% 95%;
+
+    --border: 220 13% 20%;
+    --input: 220 13% 18%;
+    --ring: 45 100% 65%;
+
+    --radius: 0.75rem;
+
+    /* Custom cinema colors */
+    --gold: 45 100% 65%;
+    --gold-muted: 45 100% 55%;
+    --cinema-dark: 220 13% 5%;
+    --cinema-darker: 220 13% 3%;
+    --spotlight: 50 100% 80%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--cinema-darker)), hsl(var(--background)));
+    --gradient-card: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted)));
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(var(--cinema-darker) / 0.5);
+    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.3);
+    --shadow-card: 0 8px 32px -8px hsl(var(--cinema-darker) / 0.7);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-quick: all 0.2s ease-out;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* Custom utility classes */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-quick {
+    transition: var(--transition-quick);
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
