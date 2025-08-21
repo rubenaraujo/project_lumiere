@@ -75,7 +75,7 @@ const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading }: FilterPane
     <div className="w-full max-w-md space-y-4">
       {/* Content Type Selector - Outside filters */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Tipo de conteúdo</label>
+        <label className="text-sm font-medium">Content Type</label>
         <ContentTypeSelector 
           value={contentType} 
           onChange={handleContentTypeChange} 
@@ -105,7 +105,7 @@ const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading }: FilterPane
         disabled={isLoading}
       >
         <Sparkles className="w-4 h-4 mr-2" />
-        {isLoading ? "A sugerir..." : "Sugerir conteúdo"}
+        {isLoading ? "Suggesting..." : "Suggest content"}
       </Button>
     </div>
   );

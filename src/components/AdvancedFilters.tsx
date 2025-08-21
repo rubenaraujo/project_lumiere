@@ -23,33 +23,33 @@ interface AdvancedFiltersProps {
 }
 
 const genres = [
-  { id: 28, name: "Acção" },
-  { id: 35, name: "Comédia" },
+  { id: 28, name: "Action" },
+  { id: 35, name: "Comedy" },
   { id: 18, name: "Drama" },
-  { id: 27, name: "Terror" },
+  { id: 27, name: "Horror" },
   { id: 10749, name: "Romance" },
-  { id: 878, name: "Ficção científica" },
+  { id: 878, name: "Science Fiction" },
   { id: 53, name: "Thriller" },
-  { id: 16, name: "Animação" },
-  { id: 12, name: "Aventura" },
-  { id: 14, name: "Fantasia" },
-  { id: 36, name: "História" },
-  { id: 10402, name: "Música" },
-  { id: 9648, name: "Mistério" },
+  { id: 16, name: "Animation" },
+  { id: 12, name: "Adventure" },
+  { id: 14, name: "Fantasy" },
+  { id: 36, name: "History" },
+  { id: 10402, name: "Music" },
+  { id: 9648, name: "Mystery" },
   { id: 80, name: "Crime" },
-  { id: 10751, name: "Família" },
-  { id: 10752, name: "Guerra" }
+  { id: 10751, name: "Family" },
+  { id: 10752, name: "War" }
 ];
 
 const languages = [
-  { code: "pt", name: "Português" },
-  { code: "en", name: "Inglês" },
-  { code: "es", name: "Espanhol" },
-  { code: "fr", name: "Francês" },
-  { code: "de", name: "Alemão" },
-  { code: "it", name: "Italiano" },
-  { code: "ja", name: "Japonês" },
-  { code: "ko", name: "Coreano" },
+  { code: "pt", name: "Portuguese" },
+  { code: "en", name: "English" },
+  { code: "es", name: "Spanish" },
+  { code: "fr", name: "French" },
+  { code: "de", name: "German" },
+  { code: "it", name: "Italian" },
+  { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" },
 ];
 
 const AdvancedFilters = ({
@@ -71,7 +71,7 @@ const AdvancedFilters = ({
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="w-full justify-between p-4">
-            <span className="font-medium">Filtros avançados</span>
+            <span className="font-medium">Advanced Filters</span>
             {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
         </CollapsibleTrigger>
@@ -81,7 +81,7 @@ const AdvancedFilters = ({
             {/* Minimum Rating */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <Label className="text-sm font-medium">Pontuação mínima</Label>
+                <Label className="text-sm font-medium">Minimum Rating</Label>
                 <span className="text-sm text-muted-foreground">{minRating}/10</span>
               </div>
               <Slider
@@ -96,7 +96,7 @@ const AdvancedFilters = ({
 
             {/* Genres */}
             <div className="space-y-3">
-              <Label>Géneros</Label>
+              <Label>Genres</Label>
               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
                 {genres.map((genre) => (
                   <div key={genre.id} className="flex items-center space-x-2">
@@ -119,7 +119,7 @@ const AdvancedFilters = ({
             {/* Year Range */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <Label>Ano de lançamento</Label>
+                <Label>Release Year</Label>
                 <span className="text-sm text-muted-foreground">
                   {yearFrom || '1970'} - {yearTo || new Date().getFullYear()}
                 </span>
@@ -136,13 +136,13 @@ const AdvancedFilters = ({
 
             {/* Language */}
             <div className="space-y-2">
-              <Label htmlFor="language">Idioma</Label>
+              <Label htmlFor="language">Language</Label>
               <Select value={language} onValueChange={onLanguageChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar idioma" />
+                  <SelectValue placeholder="Select language" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Qualquer idioma</SelectItem>
+                  <SelectItem value="all">Any language</SelectItem>
                   {languages.map((lang) => (
                     <SelectItem key={lang.code} value={lang.code}>
                       {lang.name}
@@ -160,7 +160,7 @@ const AdvancedFilters = ({
               onClick={onReset}
             >
               <RotateCcw className="w-4 h-4 mr-2" />
-              Limpar filtros
+              Clear filters
             </Button>
           </CardContent>
         </CollapsibleContent>

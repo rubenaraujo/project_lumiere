@@ -14,7 +14,7 @@ const Header = () => {
         </div>
         
         <div className="text-sm text-muted-foreground">
-          Descobre conteúdo de qualidade
+          Discover quality content
         </div>
       </div>
     </header>
