@@ -33,7 +33,7 @@ Este projeto está configurado para deploy automático no GitHub Pages através 
 
 ✅ **Status**: Deploy configurado e funcional  
 🔄 **Trigger**: Automático no push para branch main  
-🌐 **URL**: https://rubenaraujo.github.io/lumiere-cinema-selection/
+🌐 **URL**: https://rubenaraujo.github.io/project_lumiere/
 
 ### Deploy manual:
 1. Build o projeto: `npm run build`
