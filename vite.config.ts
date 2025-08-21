@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/lumiere-cinema-selection/",
+  base: "/project_lumiere/",
   server: {
     host: "::",
     port: 8080,
