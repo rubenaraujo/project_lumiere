@@ -1,48 +1,49 @@
-# Lumiere - Descobrir Filmes e Séries de Qualidade
 
-Uma aplicação web estática para descobrir filmes, séries e mini-séries de alta qualidade usando a API da TMDb.
+# Lumiere - Discover Quality Movies and Series
 
-## Funcionalidades
+A static web application to discover high-quality movies, series, and mini-series using the TMDb API.
 
-- **Filtragem inteligente**: Selecione tipo de conteúdo (filme/série), géneros, intervalo de datas e idioma
-- **Sugestões de qualidade**: Conteúdo com pontuação mínima de 7.0 e número significativo de avaliações
-- **Sugestões aleatórias**: Descubra conteúdo novo com base nos seus filtros
-- **Detalhes completos**: Veja sinopse, elenco, avaliações e informações técnicas
-- **Design responsivo**: Interface otimizada para desktop e mobile
-- **Tema escuro**: Design cinematográfico elegante
+## Features
 
-## Tecnologias Utilizadas
+- **Smart filtering**: Select content type (movie/series), genres, date range, and language
+- **Quality suggestions**: Content with a minimum score of 7.0 and a significant number of ratings
+- **Random suggestions**: Discover new content based on your filters
+- **Full details**: View synopsis, cast, ratings, and technical information
+- **Responsive design**: Interface optimized for desktop and mobile
+- **Dark theme**: Elegant cinematic design
 
-- React 18 com TypeScript
-- Tailwind CSS para estilização
-- Shadcn/ui para componentes
-- TMDb API para dados de filmes e séries
-- Vite para build e desenvolvimento
+## Technologies Used
 
-## Configuração
+- React 18 with TypeScript
+- Tailwind CSS for styling
+- Shadcn/ui for components
+- TMDb API for movie and series data
+- Vite for build and development
 
-1. Clone o repositório
-2. Instale as dependências: `npm install`
-3. Execute o projeto: `npm run dev`
+## Setup
 
-A aplicação já está configurada com uma chave API da TMDb para uso imediato.
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Run the project: `npm run dev`
 
-## Deploy
+The application is already configured with a TMDb API key for immediate use.
 
-Este projeto está configurado para deploy automático no GitHub Pages através de GitHub Actions.
+## Deployment
 
-✅ **Status**: Deploy configurado e funcional  
-🔄 **Trigger**: Automático no push para branch main  
+This project is set up for automatic deployment to GitHub Pages via GitHub Actions.
+
+✅ **Status**: Deployment configured and working  
+🔄 **Trigger**: Automatic on push to main branch  
 🌐 **URL**: https://rubenaraujo.github.io/project_lumiere/
 
-### Deploy manual:
-1. Build o projeto: `npm run build`
-2. Deploy a pasta `dist` para o GitHub Pages
+### Manual deployment:
+1. Build the project: `npm run build`
+2. Deploy the `dist` folder to GitHub Pages
 
-## Licença
+## License
 
-Este projeto foi desenvolvido por Ruben Araujo.
+This project was developed by Ruben Araujo.
 
-## Nota sobre a API
+## Note about the API
 
-A aplicação utiliza a API da TMDb para obter dados de filmes e séries. Os dados são obtidos diretamente da TMDb sem armazenamento em servidor próprio.
+The application uses the TMDb API to fetch movie and series data. Data is retrieved directly from TMDb without being stored on a separate server.
