@@ -155,7 +155,7 @@ const LumiereApp = () => {
                     Ready to discover something amazing?
                   </h3>
                   <p className="text-muted-foreground mb-6 max-w-md">
-                    Set the filters on the side and click "Suggest content" to discover 
+                    Set the filters on the side and click "Find content" to discover 
                     high-quality movies, series, and mini-series personalized for you.
                   </p>
                   <Button
@@ -166,7 +166,7 @@ const LumiereApp = () => {
                     disabled={isLoading}
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
-                    {isLoading ? "Suggesting..." : "Suggest content"}
+                    {isLoading ? "Finding..." : "Find content"}
                   </Button>
                 </CardContent>
               </Card>

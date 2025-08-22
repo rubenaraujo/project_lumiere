@@ -7,7 +7,7 @@ const Footer = () => {
             developed by <span className="text-primary font-medium">Ruben Araujo</span>
           </p>
           <p className="mt-2 text-xs">
-            Dados fornecidos por The Movie Database (TMDb)
+            Data Powered By The Movie Database (TMDb)
           </p>
         </div>
       </div>

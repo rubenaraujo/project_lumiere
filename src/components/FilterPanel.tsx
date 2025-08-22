@@ -105,7 +105,7 @@ const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading }: FilterPane
         disabled={isLoading}
       >
         <Sparkles className="w-4 h-4 mr-2" />
-        {isLoading ? "Suggesting..." : "Suggest content"}
+        {isLoading ? "Finding..." : "Find content"}
       </Button>
     </div>
   );
