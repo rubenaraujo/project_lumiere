@@ -149,7 +149,7 @@ const LumiereApp = () => {
               <Card className="shadow-card">
                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                   <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center mb-4">
-                    <Sparkles className="w-8 h-8 text-primary-foreground" />
+                    <Sparkles className="w-8 h-8 text-foreground" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground mb-2">
                     Ready to discover something amazing?
