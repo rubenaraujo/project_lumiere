@@ -91,7 +91,7 @@ const makeRequest = async (endpoint: string, params: Record<string, any> = {}) =
   const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
   url.searchParams.append('api_key', apiKey);
   url.searchParams.append('language', 'pt-BR');
-  
+
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       url.searchParams.append(key, value.toString());
@@ -99,17 +99,26 @@ const makeRequest = async (endpoint: string, params: Record<string, any> = {}) =
   });
 
   const response = await fetch(url.toString());
-  
+
   if (!response.ok) {
     throw new Error(`TMDb API error: ${response.status}`);
   }
-  
+
   return response.json();
 };
 
 export const getGenres = async (contentType: 'movie' | 'tv'): Promise<Genre[]> => {
-  const response = await makeRequest(`/genre/${contentType}/list`);
+  const response = await makeRequest(`/genre/${contentType}/list`, {
+    language: 'en-US'  // Add this line to force English genres
+  });
   return response.genres;
+};
+
+// NEW: Get genres for specific content type
+export const getGenresForContentType = async (contentType: 'movie' | 'tv' | 'miniseries'): Promise<Genre[]> => {
+  // For miniseries, use TV genres since they are a subset of TV shows
+  const searchType = contentType === 'miniseries' ? 'tv' : contentType;
+  return getGenres(searchType);
 };
 
 export const discoverContent = async (
@@ -117,20 +126,20 @@ export const discoverContent = async (
   page: number = 1
 ): Promise<TmdbResponse<ContentItem>> => {
   const { contentType, genres, yearFrom, yearTo, language, minRating } = filters;
-  
+
   // For miniseries, we search TV shows and filter by series characteristics
   const searchType = contentType === 'miniseries' ? 'tv' : contentType;
-  
+
   const params: Record<string, any> = {
     page,
     'vote_average.gte': minRating,
     'vote_count.gte': 10,
     sort_by: [
-      'popularity.desc', 
-      'popularity.asc', 
-      'release_date.desc', 
+      'popularity.desc',
+      'popularity.asc',
+      'release_date.desc',
       'release_date.asc',
-      'vote_average.desc', 
+      'vote_average.desc',
       'vote_average.asc',
       'vote_count.desc',
       'vote_count.asc'
@@ -160,9 +169,9 @@ export const discoverContent = async (
   if (language && language !== 'all') {
     params.with_original_language = language;
   }
-  
+
   const response = await makeRequest(`/discover/${searchType}`, params);
-  
+
   // Normalize the response to have consistent field names
   const normalizedResults = response.results.map((item: Movie | TvShow) => ({
     ...item,
@@ -192,70 +201,66 @@ export const clearSuggestionPool = () => {
   currentFiltersKey = '';
 };
 
-
 const buildSuggestionPool = async (filters: Filters): Promise<ContentItem[]> => {
   const filtersKey = getFiltersKey(filters);
-  
+
   // If filters changed, clear the pool
   if (currentFiltersKey !== filtersKey) {
     suggestionPool = [];
     currentFiltersKey = filtersKey;
   }
-  
+
   // If pool is already built, return it
   if (suggestionPool.length > 0) {
     return suggestionPool;
   }
-  
+
   console.log('Building complete suggestion pool...');
-  
+
   // Get first page to know total pages
   const initialResponse = await discoverContent(filters, 1);
-  
+
   if (initialResponse.results.length === 0) {
     return [];
   }
-  
+
   const allResults: ContentItem[] = [...initialResponse.results];
   const totalPages = Math.min(initialResponse.total_pages, 50); // Limit to 50 pages for performance
-  
-  console.log(`Total pages available: ${initialResponse.total_pages}, Fetching: ${totalPages}`);
-  
+
+
   // Fetch remaining pages in parallel (in batches to avoid overwhelming the API)
   const batchSize = 5;
   for (let i = 2; i <= totalPages; i += batchSize) {
     const batchPromises = [];
     const batchEnd = Math.min(i + batchSize - 1, totalPages);
-    
+
     for (let page = i; page <= batchEnd; page++) {
       batchPromises.push(discoverContent(filters, page));
     }
-    
+
     try {
       const batchResponses = await Promise.all(batchPromises);
       batchResponses.forEach(response => {
         allResults.push(...response.results);
       });
-      
-      console.log(`Fetched pages ${i}-${batchEnd}, Total items so far: ${allResults.length}`);
+
     } catch (error) {
       console.error(`Error fetching batch ${i}-${batchEnd}:`, error);
       // Continue with what we have
       break;
     }
   }
-  
+
   // Remove duplicates
-  const uniqueResults = allResults.filter((item, index, self) => 
+  const uniqueResults = allResults.filter((item, index, self) =>
     index === self.findIndex(i => i.id === item.id)
   );
-  
+
   // If searching for miniseries, get detailed info and filter more intelligently
   let filteredResults = uniqueResults;
   if (filters.contentType === 'miniseries') {
-    console.log('🎬 Filtering for miniseries characteristics...');
     const detailedResults = [];
-    
+
     // Process in batches to avoid overwhelming the API
     for (let i = 0; i < uniqueResults.length; i += 10) {
       const batch = uniqueResults.slice(i, i + 10);
@@ -263,16 +268,14 @@ const buildSuggestionPool = async (filters: Filters): Promise<ContentItem[]> => 
         try {
           const details = await makeRequest(`/tv/${item.id}`);
           // Check if it's a miniseries-like show
-          const isMiniseries = 
-            details.type === 'Miniseries' || 
+          const isMiniseries =
+            details.type === 'Miniseries' ||
             details.status === 'Ended' && details.number_of_seasons === 1 && details.number_of_episodes <= 12 ||
             details.status === 'Returning Series' && details.number_of_seasons === 1 && details.number_of_episodes <= 12;
-          
+
           if (isMiniseries) {
-            console.log(`✅ ${details.name} qualifies as miniseries: type=${details.type}, seasons=${details.number_of_seasons}, episodes=${details.number_of_episodes}, status=${details.status}`);
             return { ...item, ...details };
           } else {
-            console.log(`❌ ${details.name} doesn't qualify: type=${details.type}, seasons=${details.number_of_seasons}, episodes=${details.number_of_episodes}, status=${details.status}`);
             return null;
           }
         } catch (error) {
@@ -280,73 +283,69 @@ const buildSuggestionPool = async (filters: Filters): Promise<ContentItem[]> => 
           return null;
         }
       });
-      
+
       const batchResults = await Promise.all(detailPromises);
       detailedResults.push(...batchResults.filter(Boolean));
-      
+
       console.log(`Processed ${i + batch.length}/${uniqueResults.length} items, found ${detailedResults.length} miniseries so far`);
-      
+
       // Add delay to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 100));
     }
-    
+
     filteredResults = detailedResults;
-    console.log(`After miniseries filtering: ${filteredResults.length} items`);
   }
-  
+
   // Fisher-Yates shuffle algorithm
   for (let i = filteredResults.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [filteredResults[i], filteredResults[j]] = [filteredResults[j], filteredResults[i]];
   }
-  
+
   suggestionPool = filteredResults;
-  console.log(`Built suggestion pool with ${suggestionPool.length} unique items (shuffled)`);
-  
+
   // Debug: Check if "Presumed Innocent" is in the pool
-  const presumedInnocent = suggestionPool.find(item => 
-    (item.title || item.original_title || item.original_name)?.toLowerCase().includes('presumed innocent') || 
+  const presumedInnocent = suggestionPool.find(item =>
+    (item.title || item.original_title || item.original_name)?.toLowerCase().includes('presumed innocent') ||
     item.id === 156933
   );
   if (presumedInnocent) {
     console.log('🎯 Presumed Innocent found in suggestion pool:', presumedInnocent);
   }
-  
-  const blackBird = suggestionPool.find(item => 
-    (item.title || item.original_title || item.original_name)?.toLowerCase().includes('black bird') || 
+
+  const blackBird = suggestionPool.find(item =>
+    (item.title || item.original_title || item.original_name)?.toLowerCase().includes('black bird') ||
     item.id === 155537
   );
   if (blackBird) {
     console.log('🎯 Black Bird found in suggestion pool:', blackBird);
   }
-  
+
   return suggestionPool;
 };
 
 export const getRandomSuggestion = async (filters: Filters, excludeIds: number[] = []): Promise<ContentItem | null> => {
   try {
     const pool = await buildSuggestionPool(filters);
-    
+
     console.log(`🎯 SUGGESTION STATUS: Pool has ${pool.length} total items`);
     console.log(`🎯 SUGGESTION STATUS: ${excludeIds.length} already shown`);
     console.log(`🎯 SUGGESTION STATUS: ${pool.length - excludeIds.length} available to show`);
     console.log(`🎯 EXCLUDED IDs: [${excludeIds.join(', ')}]`);
-    
+
     if (pool.length === 0) {
       console.log('❌ No items in suggestion pool');
       return null;
     }
-    
-    // Show all available items in pool for debugging
-    console.log('📚 COMPLETE POOL CONTENTS:');
+
     pool.forEach((item, index) => {
       const isShown = excludeIds.includes(item.id);
       console.log(`  ${index + 1}. [ID: ${item.id}] ${item.title} ${isShown ? '(ALREADY SHOWN)' : '(AVAILABLE)'}`);
     });
-    
+
     // Find first item that hasn't been shown yet
     const availableItem = pool.find(item => !excludeIds.includes(item.id));
-    
+
     if (!availableItem) {
       console.log('⚠️ All suggestions have been shown. Pool exhausted. Resetting...');
       // Reset the shown IDs when pool is exhausted and return first item
@@ -354,9 +353,7 @@ export const getRandomSuggestion = async (filters: Filters, excludeIds: number[]
       console.log(`🔄 Restarting with: ${firstItem.title}`);
       return firstItem;
     }
-    
-    console.log(`✅ SELECTED SUGGESTION: [ID: ${availableItem.id}] ${availableItem.title}`);
-    console.log(`✅ This is suggestion ${excludeIds.length + 1} of ${pool.length} total`);
+
     return availableItem;
   } catch (error) {
     console.error('❌ Error getting random suggestion:', error);
@@ -366,7 +363,7 @@ export const getRandomSuggestion = async (filters: Filters, excludeIds: number[]
 
 // Get detailed information about a specific content item
 export const getContentDetails = async (
-  contentType: string, 
+  contentType: string,
   id: number
 ): Promise<any> => {
   const searchType = contentType === 'miniseries' ? 'tv' : contentType;

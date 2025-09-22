@@ -8,12 +8,12 @@ import Footer from "./Footer";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Sparkles } from "lucide-react";
-import { 
-  getRandomSuggestion, 
-  getGenres, 
+import {
+  getRandomSuggestion,
+  getGenresForContentType,
   clearSuggestionPool,
-  type ContentItem, 
-  type Filters 
+  type ContentItem,
+  type Filters
 } from "../services/tmdb";
 
 const LumiereApp = () => {
@@ -31,24 +31,24 @@ const LumiereApp = () => {
     minRating: 8
   });
 
+  // Load genres when content type changes
   useEffect(() => {
-    // Load genres for both movies and TV shows on app start
     const loadGenres = async () => {
       try {
-        const [movieGenres, tvGenres] = await Promise.all([
-          getGenres('movie'),
-          getGenres('tv')
-        ]);
+        console.log(`🎭 Loading genres for content type: ${currentFilters.contentType}`);
+        const genresData = await getGenresForContentType(currentFilters.contentType);
+        setGenres(genresData);
+        console.log(`🎭 Loaded ${genresData.length} genres for ${currentFilters.contentType}:`, genresData);
         
-        // Merge and deduplicate genres
-        const allGenres = [...movieGenres, ...tvGenres];
-        const uniqueGenres = allGenres.filter((genre, index, self) => 
-          index === self.findIndex(g => g.id === genre.id)
-        );
-        
-        setGenres(uniqueGenres);
+        // Debug: Check if Action genre is present
+        const actionGenre = genresData.find(g => g.name.toLowerCase().includes('action'));
+        if (actionGenre) {
+          console.log(`✅ Found Action genre: ID ${actionGenre.id} - ${actionGenre.name}`);
+        } else {
+          console.log(`❌ No Action genre found in ${currentFilters.contentType} genres`);
+        }
       } catch (error) {
-        console.error('Error loading genres:', error);
+        console.error('❌ Error loading genres:', error);
         toast({
           title: "Error loading genres",
           description: "Could not load the genre list.",
@@ -58,7 +58,7 @@ const LumiereApp = () => {
     };
 
     loadGenres();
-  }, [toast]);
+  }, [currentFilters.contentType, toast]);
 
   const handleFiltersChange = (filters: Filters) => {
     setCurrentFilters(filters);
@@ -73,10 +73,10 @@ const LumiereApp = () => {
     setIsLoading(true);
     try {
       const suggestion = await getRandomSuggestion(currentFilters, Array.from(shownContentIds));
-      
+
       if (suggestion) {
         setContent(suggestion);
-        
+
         // Check if this is a reset (same ID as first suggestion means pool was exhausted)
         if (shownContentIds.has(suggestion.id)) {
           console.log('🔄 Pool exhausted, resetting shown content cache');
@@ -85,12 +85,12 @@ const LumiereApp = () => {
           // Add to shown content cache
           setShownContentIds(prev => new Set([...prev, suggestion.id]));
         }
-        
+
         // Auto scroll to the suggestion after a short delay
         setTimeout(() => {
           const contentElement = document.getElementById('content-suggestion');
           if (contentElement) {
-            contentElement.scrollIntoView({ 
+            contentElement.scrollIntoView({
               behavior: 'smooth',
               block: 'start'
             });
@@ -115,11 +115,10 @@ const LumiereApp = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      
+
       <main className="flex-1 container mx-auto px-4 py-8 pb-20 lg:pb-8">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Filters Panel */}
@@ -128,6 +127,7 @@ const LumiereApp = () => {
               onFiltersChange={handleFiltersChange}
               onGetSuggestion={handleGetSuggestion}
               isLoading={isLoading}
+              availableGenres={genres}
             />
           </div>
 
@@ -138,7 +138,7 @@ const LumiereApp = () => {
                 <h2 className="text-2xl font-bold text-foreground">
                   Suggestion for you
                 </h2>
-                
+
                 <ContentCard
                   content={content}
                   contentType={currentFilters.contentType}
@@ -155,7 +155,7 @@ const LumiereApp = () => {
                     Ready to discover something amazing?
                   </h3>
                   <p className="text-muted-foreground mb-6 max-w-md">
-                    Set the filters on the side and click "Find content" to discover 
+                    Set the filters on the side and click "Find content" to discover
                     high-quality movies, series, and mini-series personalized for you.
                   </p>
                   <Button
@@ -178,9 +178,9 @@ const LumiereApp = () => {
       {/* Mobile Sticky Button - Only show when content is displayed */}
       {content && (
         <div className="lg:hidden fixed bottom-4 right-4 z-50">
-          <Button 
-            variant="spotlight" 
-            size="sm" 
+          <Button
+            variant="spotlight"
+            size="sm"
             className="shadow-lg h-10 px-4"
             onClick={handleGetSuggestion}
             disabled={isLoading}

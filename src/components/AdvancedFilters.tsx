@@ -15,31 +15,13 @@ interface AdvancedFiltersProps {
   yearTo: string;
   language: string;
   minRating: number;
+  availableGenres: { id: number; name: string; }[];
   onGenreChange: (genreId: number, checked: boolean) => void;
   onYearRangeChange: (yearFrom: number, yearTo: number) => void;
   onLanguageChange: (value: string) => void;
   onMinRatingChange: (value: number) => void;
   onReset: () => void;
 }
-
-const genres = [
-  { id: 28, name: "Action" },
-  { id: 35, name: "Comedy" },
-  { id: 18, name: "Drama" },
-  { id: 27, name: "Horror" },
-  { id: 10749, name: "Romance" },
-  { id: 878, name: "Science Fiction" },
-  { id: 53, name: "Thriller" },
-  { id: 16, name: "Animation" },
-  { id: 12, name: "Adventure" },
-  { id: 14, name: "Fantasy" },
-  { id: 36, name: "History" },
-  { id: 10402, name: "Music" },
-  { id: 9648, name: "Mystery" },
-  { id: 80, name: "Crime" },
-  { id: 10751, name: "Family" },
-  { id: 10752, name: "War" }
-];
 
 const languages = [
   { code: "pt", name: "Portuguese" },
@@ -58,6 +40,7 @@ const AdvancedFilters = ({
   yearTo,
   language,
   minRating,
+  availableGenres,
   onGenreChange,
   onYearRangeChange,
   onLanguageChange,
@@ -75,7 +58,7 @@ const AdvancedFilters = ({
             {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
         </CollapsibleTrigger>
-        
+
         <CollapsibleContent>
           <CardContent className="space-y-6 pt-0">
             {/* Minimum Rating */}
@@ -94,26 +77,32 @@ const AdvancedFilters = ({
               />
             </div>
 
-            {/* Genres */}
+            {/* Genres - Now Dynamic */}
             <div className="space-y-3">
               <Label>Genres</Label>
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                {genres.map((genre) => (
-                  <div key={genre.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`genre-${genre.id}`}
-                      checked={selectedGenres.includes(genre.id)}
-                      onCheckedChange={(checked) => onGenreChange(genre.id, checked as boolean)}
-                    />
-                    <Label 
-                      htmlFor={`genre-${genre.id}`} 
-                      className="text-sm font-normal cursor-pointer"
-                    >
-                      {genre.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
+              {availableGenres.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                  {availableGenres.map((genre) => (
+                    <div key={genre.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`genre-${genre.id}`}
+                        checked={selectedGenres.includes(genre.id)}
+                        onCheckedChange={(checked) => onGenreChange(genre.id, checked as boolean)}
+                      />
+                      <Label
+                        htmlFor={`genre-${genre.id}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {genre.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  Loading genres...
+                </div>
+              )}
             </div>
 
             {/* Year Range */}
@@ -121,14 +110,14 @@ const AdvancedFilters = ({
               <div className="flex justify-between items-center">
                 <Label>Release Year</Label>
                 <span className="text-sm text-muted-foreground">
-                  {yearFrom || '1970'} - {yearTo || new Date().getFullYear()}
+                  {yearFrom || '2000'} - {yearTo || new Date().getFullYear()}
                 </span>
               </div>
               <Slider
-                value={[parseInt(yearFrom) || 1970, parseInt(yearTo) || new Date().getFullYear()]}
+                value={[parseInt(yearFrom) || 2000, parseInt(yearTo) || new Date().getFullYear()]}
                 onValueChange={(value) => onYearRangeChange(value[0], value[1])}
                 max={new Date().getFullYear()}
-                min={1970}
+                min={2000}
                 step={1}
                 className="w-full"
               />
@@ -153,9 +142,9 @@ const AdvancedFilters = ({
             </div>
 
             {/* Reset Button */}
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="w-full"
               onClick={onReset}
             >

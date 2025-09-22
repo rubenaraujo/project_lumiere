@@ -8,9 +8,10 @@ interface FilterPanelProps {
   onFiltersChange: (filters: any) => void;
   onGetSuggestion: () => void;
   isLoading: boolean;
+  availableGenres: { id: number; name: string; }[];
 }
 
-const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading }: FilterPanelProps) => {
+const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading, availableGenres }: FilterPanelProps) => {
   const [contentType, setContentType] = useState("movie");
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
   const [yearFrom, setYearFrom] = useState("");
@@ -41,14 +42,16 @@ const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading }: FilterPane
 
   const handleContentTypeChange = (value: string) => {
     setContentType(value);
-    updateFilters(value, selectedGenres, yearFrom, yearTo, language, minRating);
+    // Clear selected genres when changing content type since genre IDs are different
+    setSelectedGenres([]);
+    updateFilters(value, [], yearFrom, yearTo, language, minRating);
   };
 
   const handleGenreChange = (genreId: number, checked: boolean) => {
     const newSelectedGenres = checked
       ? [...selectedGenres, genreId]
       : selectedGenres.filter(id => id !== genreId);
-    
+
     setSelectedGenres(newSelectedGenres);
     updateFilters(contentType, newSelectedGenres, yearFrom, yearTo, language, minRating);
   };
@@ -76,9 +79,9 @@ const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading }: FilterPane
       {/* Content Type Selector - Outside filters */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Content Type</label>
-        <ContentTypeSelector 
-          value={contentType} 
-          onChange={handleContentTypeChange} 
+        <ContentTypeSelector
+          value={contentType}
+          onChange={handleContentTypeChange}
         />
       </div>
 
@@ -89,6 +92,7 @@ const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading }: FilterPane
         yearTo={yearTo}
         language={language}
         minRating={minRating}
+        availableGenres={availableGenres}
         onGenreChange={handleGenreChange}
         onYearRangeChange={handleYearRangeChange}
         onLanguageChange={handleLanguageChange}
@@ -97,9 +101,9 @@ const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading }: FilterPane
       />
 
       {/* Suggestion Button - Hidden on mobile, visible on desktop */}
-      <Button 
-        variant="spotlight" 
-        size="lg" 
+      <Button
+        variant="spotlight"
+        size="lg"
         className="w-full hidden lg:flex"
         onClick={onGetSuggestion}
         disabled={isLoading}
