@@ -90,7 +90,7 @@ const makeRequest = async (endpoint: string, params: Record<string, any> = {}) =
 
   const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
   url.searchParams.append('api_key', apiKey);
-  url.searchParams.append('language', 'pt-BR');
+  url.searchParams.append('language', 'en-US');
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -215,7 +215,6 @@ const buildSuggestionPool = async (filters: Filters): Promise<ContentItem[]> => 
     return suggestionPool;
   }
 
-  console.log('Building complete suggestion pool...');
 
   // Get first page to know total pages
   const initialResponse = await discoverContent(filters, 1);
@@ -287,7 +286,6 @@ const buildSuggestionPool = async (filters: Filters): Promise<ContentItem[]> => 
       const batchResults = await Promise.all(detailPromises);
       detailedResults.push(...batchResults.filter(Boolean));
 
-      console.log(`Processed ${i + batch.length}/${uniqueResults.length} items, found ${detailedResults.length} miniseries so far`);
 
       // Add delay to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -304,23 +302,6 @@ const buildSuggestionPool = async (filters: Filters): Promise<ContentItem[]> => 
 
   suggestionPool = filteredResults;
 
-  // Debug: Check if "Presumed Innocent" is in the pool
-  const presumedInnocent = suggestionPool.find(item =>
-    (item.title || item.original_title || item.original_name)?.toLowerCase().includes('presumed innocent') ||
-    item.id === 156933
-  );
-  if (presumedInnocent) {
-    console.log('🎯 Presumed Innocent found in suggestion pool:', presumedInnocent);
-  }
-
-  const blackBird = suggestionPool.find(item =>
-    (item.title || item.original_title || item.original_name)?.toLowerCase().includes('black bird') ||
-    item.id === 155537
-  );
-  if (blackBird) {
-    console.log('🎯 Black Bird found in suggestion pool:', blackBird);
-  }
-
   return suggestionPool;
 };
 
@@ -328,29 +309,16 @@ export const getRandomSuggestion = async (filters: Filters, excludeIds: number[]
   try {
     const pool = await buildSuggestionPool(filters);
 
-    console.log(`🎯 SUGGESTION STATUS: Pool has ${pool.length} total items`);
-    console.log(`🎯 SUGGESTION STATUS: ${excludeIds.length} already shown`);
-    console.log(`🎯 SUGGESTION STATUS: ${pool.length - excludeIds.length} available to show`);
-    console.log(`🎯 EXCLUDED IDs: [${excludeIds.join(', ')}]`);
-
-    if (pool.length === 0) {
-      console.log('❌ No items in suggestion pool');
-      return null;
-    }
-
     pool.forEach((item, index) => {
       const isShown = excludeIds.includes(item.id);
-      console.log(`  ${index + 1}. [ID: ${item.id}] ${item.title} ${isShown ? '(ALREADY SHOWN)' : '(AVAILABLE)'}`);
     });
 
     // Find first item that hasn't been shown yet
     const availableItem = pool.find(item => !excludeIds.includes(item.id));
 
     if (!availableItem) {
-      console.log('⚠️ All suggestions have been shown. Pool exhausted. Resetting...');
       // Reset the shown IDs when pool is exhausted and return first item
       const firstItem = pool[0];
-      console.log(`🔄 Restarting with: ${firstItem.title}`);
       return firstItem;
     }
 
@@ -368,7 +336,8 @@ export const getContentDetails = async (
 ): Promise<any> => {
   const searchType = contentType === 'miniseries' ? 'tv' : contentType;
   const response = await makeRequest(`/${searchType}/${id}`, {
-    append_to_response: 'credits'
+    append_to_response: 'credits',
+    language: 'en-US'
   });
   return response;
 };

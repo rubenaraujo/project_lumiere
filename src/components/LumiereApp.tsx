@@ -35,18 +35,8 @@ const LumiereApp = () => {
   useEffect(() => {
     const loadGenres = async () => {
       try {
-        console.log(`🎭 Loading genres for content type: ${currentFilters.contentType}`);
         const genresData = await getGenresForContentType(currentFilters.contentType);
         setGenres(genresData);
-        console.log(`🎭 Loaded ${genresData.length} genres for ${currentFilters.contentType}:`, genresData);
-        
-        // Debug: Check if Action genre is present
-        const actionGenre = genresData.find(g => g.name.toLowerCase().includes('action'));
-        if (actionGenre) {
-          console.log(`✅ Found Action genre: ID ${actionGenre.id} - ${actionGenre.name}`);
-        } else {
-          console.log(`❌ No Action genre found in ${currentFilters.contentType} genres`);
-        }
       } catch (error) {
         console.error('❌ Error loading genres:', error);
         toast({
@@ -79,7 +69,6 @@ const LumiereApp = () => {
 
         // Check if this is a reset (same ID as first suggestion means pool was exhausted)
         if (shownContentIds.has(suggestion.id)) {
-          console.log('🔄 Pool exhausted, resetting shown content cache');
           setShownContentIds(new Set([suggestion.id]));
         } else {
           // Add to shown content cache
