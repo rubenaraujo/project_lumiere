@@ -182,9 +182,9 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
 
             {/* Overview */}
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Sinopse</h3>
+              <h3 className="font-semibold text-foreground mb-2">Overview</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {content.overview || "Sinopse não disponível."}
+                {content.overview || "Overview not available."}
               </p>
             </div>
 
@@ -193,7 +193,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               <div>
                 <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  {contentType === 'movie' ? 'Realização' : 'Criação'}
+                  {contentType === 'movie' ? 'Director' : 'Creator'}
                 </h3>
                 <Badge variant="outline">
                   {director || creator}
@@ -205,16 +205,16 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               {runtime && (
                 <div>
-                  <span className="font-medium text-foreground">Duração:</span>
+                  <span className="font-medium text-foreground">Duration:</span>
                   <span className="text-muted-foreground ml-1">
-                    {runtime} min{contentType !== 'movie' ? '/episódio' : ''}
+                    {runtime} min{contentType !== 'movie' ? '/episode' : ''}
                   </span>
                 </div>
               )}
               {releaseDate && (
                 <div>
                   <span className="font-medium text-foreground">
-                    {contentType === 'movie' ? 'Lançamento:' : 'Estreia:'}
+                    {contentType === 'movie' ? 'Release Date:' : 'First Aired:'}
                   </span>
                   <span className="text-muted-foreground ml-1">
                     {new Date(releaseDate).toLocaleDateString('pt-PT', { 
