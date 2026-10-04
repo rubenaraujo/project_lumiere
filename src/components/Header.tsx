@@ -4,8 +4,8 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
           <img 
-            src={`${import.meta.env.PROD ? "/project_lumiere" : ""}/logo/lumiere-logo.png`}
-            alt="Lumiere Logo" 
+            src={`${import.meta.env.BASE_URL}logo/lumiere-logo.png`}
+            alt="Logótipo Lumiere" 
             className="w-10 h-10"
           />
           <h1 className="text-2xl font-bold text-foreground">
@@ -14,7 +14,7 @@ const Header = () => {
         </div>
         
         <div className="text-sm text-muted-foreground">
-          Discover quality content
+          Descobre conteúdo de qualidade
         </div>
       </div>
     </header>

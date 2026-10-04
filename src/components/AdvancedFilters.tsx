@@ -24,14 +24,14 @@ interface AdvancedFiltersProps {
 }
 
 const languages = [
-  { code: "pt", name: "Portuguese" },
-  { code: "en", name: "English" },
-  { code: "es", name: "Spanish" },
-  { code: "fr", name: "French" },
-  { code: "de", name: "German" },
-  { code: "it", name: "Italian" },
-  { code: "ja", name: "Japanese" },
-  { code: "ko", name: "Korean" },
+  { code: "pt", name: "Português" },
+  { code: "en", name: "Inglês" },
+  { code: "es", name: "Espanhol" },
+  { code: "fr", name: "Francês" },
+  { code: "de", name: "Alemão" },
+  { code: "it", name: "Italiano" },
+  { code: "ja", name: "Japonês" },
+  { code: "ko", name: "Coreano" },
 ];
 
 const AdvancedFilters = ({
@@ -54,7 +54,7 @@ const AdvancedFilters = ({
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="w-full justify-between p-4">
-            <span className="font-medium">Advanced Filters</span>
+            <span className="font-medium">Filtros Avançados</span>
             {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
         </CollapsibleTrigger>
@@ -64,7 +64,7 @@ const AdvancedFilters = ({
             {/* Minimum Rating */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <Label className="text-sm font-medium">Minimum Rating</Label>
+                <Label className="text-sm font-medium">Classificação Mínima</Label>
                 <span className="text-sm text-muted-foreground">{minRating}/10</span>
               </div>
               <Slider
@@ -79,7 +79,7 @@ const AdvancedFilters = ({
 
             {/* Genres - Now Dynamic */}
             <div className="space-y-3">
-              <Label>Genres</Label>
+              <Label>Géneros</Label>
               {availableGenres.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
                   {availableGenres.map((genre) => (
@@ -100,7 +100,7 @@ const AdvancedFilters = ({
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground">
-                  Loading genres...
+                  A carregar géneros...
                 </div>
               )}
             </div>
@@ -108,7 +108,7 @@ const AdvancedFilters = ({
             {/* Year Range */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <Label>Release Year</Label>
+                <Label>Ano de Lançamento</Label>
                 <span className="text-sm text-muted-foreground">
                   {yearFrom || '2000'} - {yearTo || new Date().getFullYear()}
                 </span>
@@ -125,13 +125,13 @@ const AdvancedFilters = ({
 
             {/* Language */}
             <div className="space-y-2">
-              <Label htmlFor="language">Language</Label>
+              <Label htmlFor="language">Idioma</Label>
               <Select value={language} onValueChange={onLanguageChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select language" />
+                  <SelectValue placeholder="Selecionar idioma" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Any language</SelectItem>
+                  <SelectItem value="all">Qualquer idioma</SelectItem>
                   {languages.map((lang) => (
                     <SelectItem key={lang.code} value={lang.code}>
                       {lang.name}
@@ -149,7 +149,7 @@ const AdvancedFilters = ({
               onClick={onReset}
             >
               <RotateCcw className="w-4 h-4 mr-2" />
-              Clear filters
+              Limpar filtros
             </Button>
           </CardContent>
         </CollapsibleContent>

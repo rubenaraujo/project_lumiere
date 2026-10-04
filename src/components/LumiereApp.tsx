@@ -40,8 +40,8 @@ const LumiereApp = () => {
       } catch (error) {
         console.error('❌ Error loading genres:', error);
         toast({
-          title: "Error loading genres",
-          description: "Could not load the genre list.",
+          title: "Erro ao carregar géneros",
+          description: "Não foi possível carregar a lista de géneros.",
           variant: "destructive",
         });
       }
@@ -87,16 +87,16 @@ const LumiereApp = () => {
         }, 100);
       } else {
         toast({
-          title: "No suggestion found",
-          description: "Try adjusting the filters to find more content.",
+          title: "Nenhuma sugestão encontrada",
+          description: "Tenta ajustar os filtros para encontrar mais conteúdo.",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error getting suggestion:', error);
       toast({
-        title: "Error fetching suggestion",
-        description: "Please try again in a few moments.",
+        title: "Erro ao procurar sugestão",
+        description: "Por favor tenta novamente dentro de instantes.",
         variant: "destructive",
       });
     } finally {
@@ -125,7 +125,7 @@ const LumiereApp = () => {
             {content ? (
               <div id="content-suggestion" className="space-y-6">
                 <h2 className="text-2xl font-bold text-foreground">
-                  Suggestion for you
+                  Sugestão para ti
                 </h2>
 
                 <ContentCard
@@ -141,11 +141,11 @@ const LumiereApp = () => {
                     <Sparkles className="w-8 h-8 text-foreground" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground mb-2">
-                    Ready to discover something amazing?
+                    Pronto para descobrir algo incrível?
                   </h3>
                   <p className="text-muted-foreground mb-6 max-w-md">
-                    Set the filters on the side and click "Find content" to discover
-                    high-quality movies, series, and mini-series personalized for you.
+                    Define os filtros ao lado e clica em "Encontrar conteúdo" para descobrir
+                    filmes, séries e minisséries de qualidade personalizados para ti.
                   </p>
                   <Button
                     variant="spotlight"
@@ -155,7 +155,7 @@ const LumiereApp = () => {
                     disabled={isLoading}
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
-                    {isLoading ? "Finding..." : "Find content"}
+                    {isLoading ? "A procurar..." : "Encontrar conteúdo"}
                   </Button>
                 </CardContent>
               </Card>
@@ -175,7 +175,7 @@ const LumiereApp = () => {
             disabled={isLoading}
           >
             <Sparkles className="w-4 h-4 mr-1" />
-            {isLoading ? "..." : "Suggest"}
+            {isLoading ? "..." : "Sugerir"}
           </Button>
         </div>
       )}

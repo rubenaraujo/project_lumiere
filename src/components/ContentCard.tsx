@@ -103,7 +103,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
             </h1>
             {isOriginalTitleDifferent && (
               <p className="text-sm text-white/80 mb-2 italic drop-shadow">
-                Original title: {originalTitle}
+                Título original: {originalTitle}
               </p>
             )}
             <div className="flex items-center gap-4 text-white/90 text-sm">
@@ -119,7 +119,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               </div>
               <div className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
-                {content.vote_count.toLocaleString()} votes
+                {content.vote_count.toLocaleString()} votos
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               />
             ) : (
               <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
-                <span className="text-muted-foreground">No image available</span>
+                <span className="text-muted-foreground">Sem imagem disponível</span>
               </div>
             )}
           </div>
@@ -153,7 +153,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                 </h1>
                 {isOriginalTitleDifferent && (
                   <p className="text-sm text-muted-foreground mb-2 italic">
-                    Original title: {originalTitle}
+                    Título original: {originalTitle}
                   </p>
                 )}
                 <div className="flex items-center gap-4 text-muted-foreground text-sm">
@@ -169,7 +169,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    {content.vote_count.toLocaleString()} votes
+                    {content.vote_count.toLocaleString()} votos
                   </div>
                 </div>
               </div>
@@ -189,9 +189,9 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
 
             {/* Overview */}
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Overview</h3>
+              <h3 className="font-semibold text-foreground mb-2">Sinopse</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {content.overview || "Overview not available."}
+                {content.overview || "Sinopse não disponível."}
               </p>
             </div>
 
@@ -200,7 +200,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               <div>
                 <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  {contentType === 'movie' ? 'Director' : 'Creator'}
+                  {contentType === 'movie' ? 'Realizador' : 'Criador'}
                 </h3>
                 <Badge variant="outline">
                   {director || creator}
@@ -213,7 +213,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               <div>
                 <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                   <Clapperboard className="w-4 h-4" />
-                  Cast
+                  Elenco
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {cast.map((member) => (
@@ -229,19 +229,19 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               {runtime && (
                 <div>
-                  <span className="font-medium text-foreground">Duration:</span>
+                  <span className="font-medium text-foreground">Duração:</span>
                   <span className="text-muted-foreground ml-1">
-                    {runtime} min{contentType !== 'movie' ? '/episode' : ''}
+                    {runtime} min{contentType !== 'movie' ? '/episódio' : ''}
                   </span>
                 </div>
               )}
               {releaseDate && (
                 <div>
                   <span className="font-medium text-foreground">
-                    {contentType === 'movie' ? 'Release Date:' : 'First Aired:'}
+                    {contentType === 'movie' ? 'Data de Lançamento:' : 'Primeira Exibição:'}
                   </span>
                   <span className="text-muted-foreground ml-1">
-                    {new Date(releaseDate).toLocaleDateString('en-US', { 
+                    {new Date(releaseDate).toLocaleDateString('pt-PT', { 
                       day: 'numeric', 
                       month: 'long', 
                       year: 'numeric' 
@@ -256,17 +256,17 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               <div>
                 <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                   <Tv className="w-4 h-4" />
-                  Where to Watch
+                  Onde Ver
                 </h3>
                 <div className="space-y-2">
                   {([
-                    { label: "Stream", providers: watchProviders.flatrate },
-                    { label: "Rent", providers: watchProviders.rent },
-                    { label: "Buy", providers: watchProviders.buy },
+                    { label: "Streaming", providers: watchProviders.flatrate },
+                    { label: "Alugar", providers: watchProviders.rent },
+                    { label: "Comprar", providers: watchProviders.buy },
                   ] as const).map(({ label, providers }) =>
                     providers && providers.length > 0 ? (
                       <div key={label} className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-medium text-muted-foreground w-12">
+                        <span className="text-xs font-medium text-muted-foreground w-16">
                           {label}
                         </span>
                         {providers.map((provider) => (
@@ -289,7 +289,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                     rel="noreferrer"
                     className="text-xs text-primary underline mt-2 inline-block"
                   >
-                    More details on TMDb
+                    Mais detalhes no TMDb
                   </a>
                 )}
               </div>
@@ -303,7 +303,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                 onClick={() => window.open(trailerUrl, '_blank')}
               >
                 <Play className="w-4 h-4 mr-2" />
-                Watch Trailer
+                Ver Trailer
               </Button>
             </div>
           </div>

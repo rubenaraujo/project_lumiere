@@ -110,7 +110,7 @@ const makeRequest = async (endpoint: string, params: Record<string, any> = {}) =
 
   const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
   url.searchParams.append('api_key', apiKey);
-  url.searchParams.append('language', 'en-US');
+  url.searchParams.append('language', 'pt-PT');
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -363,7 +363,7 @@ export const getContentDetails = async (
 // Guess a sensible default region (ISO 3166-1 country code) from the
 // browser's locale, falling back to the US when it can't be determined.
 export const getDefaultRegion = (): string => {
-  const locale = typeof navigator !== 'undefined' ? navigator.language : 'en-US';
+  const locale = typeof navigator !== 'undefined' ? navigator.language : 'pt-PT';
   const region = locale.split('-')[1];
   return region ? region.toUpperCase() : 'US';
 };

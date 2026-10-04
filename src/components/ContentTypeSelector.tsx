@@ -8,9 +8,9 @@ interface ContentTypeSelectorProps {
 
 const ContentTypeSelector = ({ value, onChange }: ContentTypeSelectorProps) => {
   const options = [
-    { value: "movie", label: "Movies", icon: Film },
-    { value: "tv", label: "TV Shows", icon: Tv },
-    { value: "miniseries", label: "Miniseries", icon: Clock },
+    { value: "movie", label: "Filmes", icon: Film },
+    { value: "tv", label: "Séries", icon: Tv },
+    { value: "miniseries", label: "Minisséries", icon: Clock },
   ];
 
   return (

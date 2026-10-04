@@ -47,7 +47,7 @@ describe("tmdb service", () => {
       expect(requestedUrl.pathname).toBe("/3/genre/movie/list");
       // Regression test: a duplicated 'language' param previously caused
       // TMDb to respond with a 400 "Invalid parameters" error.
-      expect(requestedUrl.searchParams.getAll("language")).toEqual(["en-US"]);
+      expect(requestedUrl.searchParams.getAll("language")).toEqual(["pt-PT"]);
     });
 
     it("throws a descriptive error when the API responds with a non-ok status", async () => {
@@ -162,7 +162,7 @@ describe("tmdb service", () => {
       expect(requestedUrl.searchParams.get("append_to_response")).toBe("credits,watch/providers");
       // Regression test: a duplicated 'language' param previously caused
       // TMDb to respond with a 400 "Invalid parameters" error.
-      expect(requestedUrl.searchParams.getAll("language")).toEqual(["en-US"]);
+      expect(requestedUrl.searchParams.getAll("language")).toEqual(["pt-PT"]);
     });
 
     it("maps 'miniseries' to the 'tv' details endpoint", async () => {
