@@ -108,9 +108,9 @@ const makeRequest = async (endpoint: string, params: Record<string, any> = {}) =
 };
 
 export const getGenres = async (contentType: 'movie' | 'tv'): Promise<Genre[]> => {
-  const response = await makeRequest(`/genre/${contentType}/list`, {
-    language: 'en-US'  // Add this line to force English genres
-  });
+  // Note: 'language' is already appended by makeRequest; adding it again here
+  // duplicated the query param and caused TMDb to respond with a 400 error.
+  const response = await makeRequest(`/genre/${contentType}/list`);
   return response.genres;
 };
 
