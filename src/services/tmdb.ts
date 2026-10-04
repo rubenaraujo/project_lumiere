@@ -309,10 +309,6 @@ export const getRandomSuggestion = async (filters: Filters, excludeIds: number[]
   try {
     const pool = await buildSuggestionPool(filters);
 
-    pool.forEach((item, index) => {
-      const isShown = excludeIds.includes(item.id);
-    });
-
     // Find first item that hasn't been shown yet
     const availableItem = pool.find(item => !excludeIds.includes(item.id));
 
@@ -335,9 +331,10 @@ export const getContentDetails = async (
   id: number
 ): Promise<any> => {
   const searchType = contentType === 'miniseries' ? 'tv' : contentType;
+  // Note: 'language' is already appended by makeRequest; do not repeat it here
+  // (duplicate query params cause TMDb to respond with a 400 error).
   const response = await makeRequest(`/${searchType}/${id}`, {
-    append_to_response: 'credits',
-    language: 'en-US'
+    append_to_response: 'credits'
   });
   return response;
 };
