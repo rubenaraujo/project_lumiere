@@ -56,6 +56,26 @@ interface Genre {
   name: string;
 }
 
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
+
+export interface WatchProviderOption {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string;
+}
+
+export interface WatchProviders {
+  link?: string;
+  flatrate?: WatchProviderOption[];
+  rent?: WatchProviderOption[];
+  buy?: WatchProviderOption[];
+}
+
 export interface ContentItem {
   id: number;
   title: string;
@@ -325,7 +345,8 @@ export const getRandomSuggestion = async (filters: Filters, excludeIds: number[]
   }
 };
 
-// Get detailed information about a specific content item
+// Get detailed information about a specific content item, including the
+// credits (cast/crew) and the watch providers by region.
 export const getContentDetails = async (
   contentType: string,
   id: number
@@ -334,7 +355,43 @@ export const getContentDetails = async (
   // Note: 'language' is already appended by makeRequest; do not repeat it here
   // (duplicate query params cause TMDb to respond with a 400 error).
   const response = await makeRequest(`/${searchType}/${id}`, {
-    append_to_response: 'credits'
+    append_to_response: 'credits,watch/providers'
   });
   return response;
+};
+
+// Guess a sensible default region (ISO 3166-1 country code) from the
+// browser's locale, falling back to the US when it can't be determined.
+export const getDefaultRegion = (): string => {
+  const locale = typeof navigator !== 'undefined' ? navigator.language : 'en-US';
+  const region = locale.split('-')[1];
+  return region ? region.toUpperCase() : 'US';
+};
+
+// Extract the top-billed cast members from a content details response.
+export const getCast = (details: any, limit: number = 5): CastMember[] => {
+  const cast = details?.credits?.cast;
+  if (!Array.isArray(cast)) {
+    return [];
+  }
+
+  return cast.slice(0, limit).map((member: any) => ({
+    id: member.id,
+    name: member.name,
+    character: member.character,
+    profile_path: member.profile_path ?? null,
+  }));
+};
+
+// Extract the watch providers (streaming/rent/buy) for a given region from
+// a content details response. Falls back to the US region, then to null
+// when no providers are available at all.
+export const getWatchProviders = (details: any, region?: string): WatchProviders | null => {
+  const resultsByRegion = details?.['watch/providers']?.results;
+  if (!resultsByRegion) {
+    return null;
+  }
+
+  const targetRegion = region || getDefaultRegion();
+  return resultsByRegion[targetRegion] || resultsByRegion.US || null;
 };

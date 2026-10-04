@@ -2,10 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearSuggestionPool,
   discoverContent,
+  getCast,
   getContentDetails,
   getGenres,
   getGenresForContentType,
   getRandomSuggestion,
+  getWatchProviders,
   type Filters,
 } from "./tmdb";
 
@@ -157,7 +159,7 @@ describe("tmdb service", () => {
 
       const requestedUrl = new URL(fetchMock.mock.calls[0][0] as string);
       expect(requestedUrl.pathname).toBe("/3/movie/1");
-      expect(requestedUrl.searchParams.get("append_to_response")).toBe("credits");
+      expect(requestedUrl.searchParams.get("append_to_response")).toBe("credits,watch/providers");
       // Regression test: a duplicated 'language' param previously caused
       // TMDb to respond with a 400 "Invalid parameters" error.
       expect(requestedUrl.searchParams.getAll("language")).toEqual(["en-US"]);
@@ -199,6 +201,54 @@ describe("tmdb service", () => {
       const suggestion = await getRandomSuggestion(baseFilters, []);
 
       expect(suggestion).toBeNull();
+    });
+  });
+
+  describe("getCast", () => {
+    it("maps and limits the top-billed cast members", () => {
+      const details = {
+        credits: {
+          cast: [
+            { id: 1, name: "Actor One", character: "Hero", profile_path: "/one.jpg" },
+            { id: 2, name: "Actor Two", character: "Villain", profile_path: null },
+            { id: 3, name: "Actor Three", character: "Sidekick", profile_path: "/three.jpg" },
+          ],
+        },
+      };
+
+      const cast = getCast(details, 2);
+
+      expect(cast).toEqual([
+        { id: 1, name: "Actor One", character: "Hero", profile_path: "/one.jpg" },
+        { id: 2, name: "Actor Two", character: "Villain", profile_path: null },
+      ]);
+    });
+
+    it("returns an empty array when there is no cast information", () => {
+      expect(getCast({})).toEqual([]);
+    });
+  });
+
+  describe("getWatchProviders", () => {
+    const details = {
+      "watch/providers": {
+        results: {
+          PT: { link: "https://tmdb.org/pt", flatrate: [{ provider_id: 1, provider_name: "Netflix", logo_path: "/n.jpg" }] },
+          US: { link: "https://tmdb.org/us", flatrate: [{ provider_id: 2, provider_name: "Hulu", logo_path: "/h.jpg" }] },
+        },
+      },
+    };
+
+    it("returns providers for the requested region", () => {
+      expect(getWatchProviders(details, "PT")).toEqual(details["watch/providers"].results.PT);
+    });
+
+    it("falls back to the US region when the requested region has no data", () => {
+      expect(getWatchProviders(details, "FR")).toEqual(details["watch/providers"].results.US);
+    });
+
+    it("returns null when there is no watch provider information", () => {
+      expect(getWatchProviders({}, "PT")).toBeNull();
     });
   });
 });

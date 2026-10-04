@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Calendar, Star, Users, Play, User } from "lucide-react";
-import { getContentDetails } from "../services/tmdb";
+import { Calendar, Star, Users, Play, User, Clapperboard, Tv } from "lucide-react";
+import { getContentDetails, getCast, getWatchProviders, type CastMember, type WatchProviders } from "../services/tmdb";
 
 interface ContentCardProps {
   content: {
@@ -32,9 +32,13 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
   const [director, setDirector] = useState<string>("");
   const [creator, setCreator] = useState<string>("");
   const [runtime, setRuntime] = useState<number | null>(null);
-  
+  const [cast, setCast] = useState<CastMember[]>([]);
+  const [watchProviders, setWatchProviders] = useState<WatchProviders | null>(null);
+
   const imageBaseUrl = "https://image.tmdb.org/t/p/w500";
   const backdropBaseUrl = "https://image.tmdb.org/t/p/w1280";
+  const profileBaseUrl = "https://image.tmdb.org/t/p/w185";
+  const providerLogoBaseUrl = "https://image.tmdb.org/t/p/w92";
   
   const releaseDate = content.release_date || content.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : "";
@@ -72,6 +76,9 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
             setRuntime(details.episode_run_time[0]);
           }
         }
+
+        setCast(getCast(details));
+        setWatchProviders(getWatchProviders(details));
       } catch (error) {
         console.error('Error fetching content details:', error);
       }
@@ -96,7 +103,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
             </h1>
             {isOriginalTitleDifferent && (
               <p className="text-sm text-white/80 mb-2 italic drop-shadow">
-                Título original: {originalTitle}
+                Original title: {originalTitle}
               </p>
             )}
             <div className="flex items-center gap-4 text-white/90 text-sm">
@@ -112,7 +119,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               </div>
               <div className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
-                {content.vote_count.toLocaleString()} votos
+                {content.vote_count.toLocaleString()} votes
               </div>
             </div>
           </div>
@@ -131,7 +138,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               />
             ) : (
               <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
-                <span className="text-muted-foreground">Sem imagem</span>
+                <span className="text-muted-foreground">No image available</span>
               </div>
             )}
           </div>
@@ -146,7 +153,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                 </h1>
                 {isOriginalTitleDifferent && (
                   <p className="text-sm text-muted-foreground mb-2 italic">
-                    Título original: {originalTitle}
+                    Original title: {originalTitle}
                   </p>
                 )}
                 <div className="flex items-center gap-4 text-muted-foreground text-sm">
@@ -162,7 +169,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    {content.vote_count.toLocaleString()} votos
+                    {content.vote_count.toLocaleString()} votes
                   </div>
                 </div>
               </div>
@@ -201,6 +208,23 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               </div>
             )}
 
+            {/* Cast */}
+            {cast.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <Clapperboard className="w-4 h-4" />
+                  Cast
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {cast.map((member) => (
+                    <Badge key={member.id} variant="outline" title={member.character}>
+                      {member.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Additional Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               {runtime && (
@@ -217,7 +241,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                     {contentType === 'movie' ? 'Release Date:' : 'First Aired:'}
                   </span>
                   <span className="text-muted-foreground ml-1">
-                    {new Date(releaseDate).toLocaleDateString('pt-PT', { 
+                    {new Date(releaseDate).toLocaleDateString('en-US', { 
                       day: 'numeric', 
                       month: 'long', 
                       year: 'numeric' 
@@ -227,6 +251,50 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               )}
             </div>
 
+            {/* Where to Watch */}
+            {watchProviders && (watchProviders.flatrate || watchProviders.rent || watchProviders.buy) && (
+              <div>
+                <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <Tv className="w-4 h-4" />
+                  Where to Watch
+                </h3>
+                <div className="space-y-2">
+                  {([
+                    { label: "Stream", providers: watchProviders.flatrate },
+                    { label: "Rent", providers: watchProviders.rent },
+                    { label: "Buy", providers: watchProviders.buy },
+                  ] as const).map(({ label, providers }) =>
+                    providers && providers.length > 0 ? (
+                      <div key={label} className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-medium text-muted-foreground w-12">
+                          {label}
+                        </span>
+                        {providers.map((provider) => (
+                          <img
+                            key={provider.provider_id}
+                            src={`${providerLogoBaseUrl}${provider.logo_path}`}
+                            alt={provider.provider_name}
+                            title={provider.provider_name}
+                            className="w-8 h-8 rounded-md"
+                          />
+                        ))}
+                      </div>
+                    ) : null
+                  )}
+                </div>
+                {watchProviders.link && (
+                  <a
+                    href={watchProviders.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-primary underline mt-2 inline-block"
+                  >
+                    More details on TMDb
+                  </a>
+                )}
+              </div>
+            )}
+
             {/* Action Button */}
             <div className="pt-4">
               <Button
@@ -235,7 +303,7 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                 onClick={() => window.open(trailerUrl, '_blank')}
               >
                 <Play className="w-4 h-4 mr-2" />
-                Ver Trailer
+                Watch Trailer
               </Button>
             </div>
           </div>
