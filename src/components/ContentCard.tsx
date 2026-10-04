@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Calendar, Star, Users, Play, User, Clapperboard, Tv } from "lucide-react";
-import { getContentDetails, getCast, getWatchProviders, type CastMember, type WatchProviders } from "../services/tmdb";
+import { getContentDetails, getCast, getWatchProviders } from "../services/tmdb";
 
 interface ContentCardProps {
   content: {
@@ -29,11 +29,25 @@ interface ContentCardProps {
 }
 
 const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
-  const [director, setDirector] = useState<string>("");
-  const [creator, setCreator] = useState<string>("");
-  const [runtime, setRuntime] = useState<number | null>(null);
-  const [cast, setCast] = useState<CastMember[]>([]);
-  const [watchProviders, setWatchProviders] = useState<WatchProviders | null>(null);
+  // Cached per content type + id by react-query: switching back to a
+  // previously-viewed suggestion is instant, and an in-flight request is
+  // superseded (its signal aborted) as soon as the content changes.
+  const { data: details } = useQuery({
+    queryKey: ['content-details', contentType, content.id],
+    queryFn: ({ signal }) => getContentDetails(contentType, content.id, signal),
+  });
+
+  const director = contentType === 'movie'
+    ? details?.credits?.crew?.find((person: any) => person.job === 'Director')?.name ?? ""
+    : "";
+  const creator = (contentType === 'tv' || contentType === 'miniseries') && details?.created_by?.length > 0
+    ? details.created_by[0].name
+    : "";
+  const runtime = contentType === 'movie'
+    ? details?.runtime ?? null
+    : details?.episode_run_time?.[0] ?? null;
+  const cast = details ? getCast(details) : [];
+  const watchProviders = details ? getWatchProviders(details) : null;
 
   const imageBaseUrl = "https://image.tmdb.org/t/p/w500";
   const backdropBaseUrl = "https://image.tmdb.org/t/p/w1280";
@@ -51,41 +65,6 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
     .slice(0, 3);
 
   const trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(content.title + ' trailer')}`;
-
-  // Fetch detailed information to get director/creator and additional info
-  useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        const details = await getContentDetails(contentType, content.id);
-        
-        if (contentType === 'movie') {
-          if (details.credits?.crew) {
-            const directorInfo = details.credits.crew.find((person: any) => person.job === 'Director');
-            if (directorInfo) {
-              setDirector(directorInfo.name);
-            }
-          }
-          if (details.runtime) {
-            setRuntime(details.runtime);
-          }
-        } else if (contentType === 'tv' || contentType === 'miniseries') {
-          if (details.created_by && details.created_by.length > 0) {
-            setCreator(details.created_by[0].name);
-          }
-          if (details.episode_run_time && details.episode_run_time.length > 0) {
-            setRuntime(details.episode_run_time[0]);
-          }
-        }
-
-        setCast(getCast(details));
-        setWatchProviders(getWatchProviders(details));
-      } catch (error) {
-        console.error('Error fetching content details:', error);
-      }
-    };
-
-    fetchDetails();
-  }, [content.id, contentType]);
 
   return (
     <Card className="w-full max-w-4xl shadow-card overflow-hidden">
@@ -282,16 +261,6 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
                     ) : null
                   )}
                 </div>
-                {watchProviders.link && (
-                  <a
-                    href={watchProviders.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-primary underline mt-2 inline-block"
-                  >
-                    Mais detalhes no TMDb
-                  </a>
-                )}
               </div>
             )}
 

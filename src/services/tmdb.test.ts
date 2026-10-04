@@ -202,6 +202,68 @@ describe("tmdb service", () => {
 
       expect(suggestion).toBeNull();
     });
+
+    it("resolves with the first page without waiting for subsequent pages to finish loading", async () => {
+      let resolveSecondPage!: (value: Response) => void;
+      const secondPagePromise = new Promise<Response>((resolve) => {
+        resolveSecondPage = resolve;
+      });
+
+      vi.spyOn(global, "fetch").mockImplementation(async (input) => {
+        const url = new URL(input as string);
+        if (url.searchParams.get("page") === "1") {
+          return jsonResponse({
+            results: [{ id: 1, title: "A", genre_ids: [] }],
+            total_pages: 2,
+            total_results: 2,
+          }) as Response;
+        }
+        // Page 2+: left pending on purpose for the duration of this test.
+        return secondPagePromise;
+      });
+
+      const suggestion = await getRandomSuggestion(baseFilters, []);
+
+      expect(suggestion?.id).toBe(1);
+
+      // Clean up the still-pending request so it doesn't leak into other tests.
+      resolveSecondPage(
+        jsonResponse({ results: [], total_pages: 2, total_results: 0 }) as Response
+      );
+    });
+
+    it("uses the same 'sort_by' value for every page within a single pool build", async () => {
+      const fetchMock = vi.spyOn(global, "fetch").mockImplementation(async (input) => {
+        const url = new URL(input as string);
+        const page = url.searchParams.get("page");
+        return jsonResponse({
+          results: [{ id: page === "1" ? 1 : 2, title: page === "1" ? "A" : "B", genre_ids: [] }],
+          total_pages: 2,
+          total_results: 2,
+        }) as Response;
+      });
+
+      await getRandomSuggestion(baseFilters, []);
+      // Give the background continuation (page 2) a chance to run.
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      const sortByValues = fetchMock.mock.calls.map(
+        ([input]) => new URL(input as string).searchParams.get("sort_by")
+      );
+      expect(sortByValues[0]).toBe(sortByValues[1]);
+    });
+
+    it("propagates an AbortError instead of swallowing it as a regular failure", async () => {
+      const controller = new AbortController();
+      vi.spyOn(global, "fetch").mockImplementation(() =>
+        Promise.reject(new DOMException("Aborted", "AbortError"))
+      );
+
+      await expect(
+        getRandomSuggestion(baseFilters, [], controller.signal)
+      ).rejects.toMatchObject({ name: "AbortError" });
+    });
   });
 
   describe("getCast", () => {

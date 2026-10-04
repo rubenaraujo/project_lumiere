@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useToast } from "../hooks/use-toast";
 import Header from "./Header";
 import FilterPanel from "./FilterPanel";
@@ -20,7 +21,6 @@ const LumiereApp = () => {
   const { toast } = useToast();
   const [content, setContent] = useState<ContentItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [genres, setGenres] = useState<{ id: number; name: string; }[]>([]);
   const [shownContentIds, setShownContentIds] = useState<Set<number>>(new Set());
   const [currentFilters, setCurrentFilters] = useState<Filters>({
     contentType: 'movie',
@@ -30,27 +30,41 @@ const LumiereApp = () => {
     language: 'en',
     minRating: 8
   });
+  // Tracks the AbortController for the suggestion request currently in
+  // flight, so a new request (filter change, extra click) can cancel a
+  // stale one instead of racing with it.
+  const suggestionAbortRef = useRef<AbortController | null>(null);
 
-  // Load genres when content type changes
+  // Genres are cached per content type by react-query, so switching between
+  // "movie"/"tv"/"miniseries" and back doesn't refetch, and in-flight
+  // requests are automatically cancelled if they become stale.
+  const { data: genres = [], error: genresError } = useQuery({
+    queryKey: ['genres', currentFilters.contentType],
+    queryFn: ({ signal }) => getGenresForContentType(currentFilters.contentType, signal),
+    staleTime: 24 * 60 * 60 * 1000, // genre lists rarely change
+  });
+
   useEffect(() => {
-    const loadGenres = async () => {
-      try {
-        const genresData = await getGenresForContentType(currentFilters.contentType);
-        setGenres(genresData);
-      } catch (error) {
-        console.error('❌ Error loading genres:', error);
-        toast({
-          title: "Erro ao carregar géneros",
-          description: "Não foi possível carregar a lista de géneros.",
-          variant: "destructive",
-        });
-      }
-    };
+    if (genresError) {
+      console.error('❌ Error loading genres:', genresError);
+      toast({
+        title: "Erro ao carregar géneros",
+        description: "Não foi possível carregar a lista de géneros.",
+        variant: "destructive",
+      });
+    }
+  }, [genresError, toast]);
 
-    loadGenres();
-  }, [currentFilters.contentType, toast]);
+  // Abort any in-flight suggestion request when the component unmounts.
+  useEffect(() => {
+    return () => {
+      suggestionAbortRef.current?.abort();
+    };
+  }, []);
 
   const handleFiltersChange = (filters: Filters) => {
+    // Cancel any suggestion fetch still in flight for the previous filters.
+    suggestionAbortRef.current?.abort();
     setCurrentFilters(filters);
     // Clear current content and cache when filters change
     setContent(null);
@@ -60,9 +74,18 @@ const LumiereApp = () => {
   };
 
   const handleGetSuggestion = async () => {
+    // Cancel any suggestion fetch still in flight before starting a new one.
+    suggestionAbortRef.current?.abort();
+    const controller = new AbortController();
+    suggestionAbortRef.current = controller;
+
     setIsLoading(true);
     try {
-      const suggestion = await getRandomSuggestion(currentFilters, Array.from(shownContentIds));
+      const suggestion = await getRandomSuggestion(
+        currentFilters,
+        Array.from(shownContentIds),
+        controller.signal
+      );
 
       if (suggestion) {
         setContent(suggestion);
@@ -93,6 +116,10 @@ const LumiereApp = () => {
         });
       }
     } catch (error) {
+      if ((error as Error)?.name === 'AbortError') {
+        // Superseded by a newer request; nothing to do.
+        return;
+      }
       console.error('Error getting suggestion:', error);
       toast({
         title: "Erro ao procurar sugestão",
@@ -100,7 +127,9 @@ const LumiereApp = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      if (suggestionAbortRef.current === controller) {
+        setIsLoading(false);
+      }
     }
   };
 
