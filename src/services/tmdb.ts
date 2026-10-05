@@ -473,7 +473,7 @@ export const getContentDetails = async (
   // Note: 'language' is already appended by makeRequest; do not repeat it here
   // (duplicate query params cause TMDb to respond with a 400 error).
   const response = await makeRequest(`/${searchType}/${id}`, {
-    append_to_response: 'credits,watch/providers'
+    append_to_response: 'credits,watch/providers,external_ids'
   }, signal);
   return response;
 };

@@ -66,6 +66,11 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
 
   const trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(content.title + ' trailer')}`;
 
+  const tmdbSearchType = contentType === 'miniseries' ? 'tv' : contentType;
+  const tmdbUrl = `https://www.themoviedb.org/${tmdbSearchType}/${content.id}`;
+  const imdbId = details?.imdb_id || details?.external_ids?.imdb_id;
+  const imdbUrl = imdbId ? `https://www.imdb.com/title/${imdbId}/` : null;
+
   return (
     <Card className="w-full max-w-4xl shadow-card overflow-hidden">
       {/* Backdrop Image */}
@@ -264,15 +269,42 @@ const ContentCard = ({ content, contentType, genres }: ContentCardProps) => {
               </div>
             )}
 
-            {/* Action Button */}
-            <div className="pt-4">
+            {/* Action Buttons */}
+            <div className="pt-4 flex gap-2">
               <Button
                 size="lg"
-                className="w-full"
+                className="flex-1"
                 onClick={() => window.open(trailerUrl, '_blank')}
               >
                 <Play className="w-4 h-4 mr-2" />
                 Ver Trailer
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-11 w-11 shrink-0 bg-[#f5c518] border-[#f5c518] hover:bg-[#f5c518]/90"
+                onClick={() => imdbUrl && window.open(imdbUrl, '_blank')}
+                disabled={!imdbUrl}
+                title={imdbUrl ? "Abrir no IMDb" : "Link do IMDb indisponível"}
+              >
+                <img
+                  src="https://www.imdb.com/favicon.ico"
+                  alt="IMDb"
+                  className="w-7 h-7"
+                />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-11 w-11 shrink-0 bg-[#0d253f] border-[#0d253f] hover:bg-[#0d253f]/90"
+                onClick={() => window.open(tmdbUrl, '_blank')}
+                title="Abrir no TMDb"
+              >
+                <img
+                  src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg"
+                  alt="TMDb"
+                  className="w-7 h-7"
+                />
               </Button>
             </div>
           </div>
