@@ -10,32 +10,32 @@ All colors MUST be HSL.
   :root {
     /* Dark cinema theme - always active */
     --background: 220 13% 8%;
-    --foreground: 45 100% 95%;
+    --foreground: 208 38% 86%;
 
     --card: 220 13% 12%;
-    --card-foreground: 45 100% 95%;
+    --card-foreground: 208 38% 86%;
 
     --popover: 220 13% 12%;
-    --popover-foreground: 45 100% 95%;
+    --popover-foreground: 208 38% 86%;
 
-    --primary: 37 47% 91%;
-    --primary-foreground: 220 13% 8%;
+    --primary: 38 55% 62%;
+    --primary-foreground: 25 60% 8%;
 
     --secondary: 220 13% 18%;
-    --secondary-foreground: 45 100% 95%;
+    --secondary-foreground: 208 38% 86%;
 
     --muted: 220 13% 15%;
-    --muted-foreground: 45 10% 70%;
+    --muted-foreground: 213 16% 66%;
 
-    --accent: 37 40% 78%;
+    --accent: 34 48% 50%;
     --accent-foreground: 220 13% 8%;
 
     --destructive: 0 84% 65%;
-    --destructive-foreground: 45 100% 95%;
+    --destructive-foreground: 208 38% 86%;
 
     --border: 220 13% 20%;
     --input: 220 13% 18%;
-    --ring: 37 47% 91%;
+    --ring: 38 55% 62%;
 
     --radius: 0.75rem;
 
@@ -114,6 +114,19 @@ All colors MUST be HSL.
   html {
     scroll-behavior: smooth;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
   
   /* Custom scrollbar */
   ::-webkit-scrollbar {
@@ -140,6 +153,16 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }

@@ -1,49 +1,58 @@
-
 # Lumiere - Discover Quality Movies and Series
 
-A static web application to discover high-quality movies, series, and mini-series using the TMDb API.
+A web app to discover high-quality movies, series and miniseries using the TMDb API. Available in Portuguese and English.
 
 ## Features
 
-- **Smart filtering**: Select content type (movie/series), genres, date range, and language
-- **Quality suggestions**: Content with a minimum score of 7.0 and a significant number of ratings
-- **Random suggestions**: Discover new content based on your filters
-- **Full details**: View synopsis, cast, ratings, and technical information
-- **Responsive design**: Interface optimized for desktop and mobile
-- **Dark theme**: Elegant cinematic design
+- **Smart filtering**: content type (movie / series / miniseries), genres, release years, original language and minimum rating
+- **Random quality suggestions** that don't repeat, even after a reload
+- **Shareable filters**: the current filters live in the URL and are also remembered in `localStorage`
+- **Full details**: synopsis, cast, director/creator, where to watch, IMDb/TMDb links and trailer search
+- **Bilingual UI** (PT / EN): the interface and the TMDb content follow the selected language
+- **Responsive, dark cinematic design**
 
-## Technologies Used
+## Tech stack
 
-- React 18 with TypeScript
-- Tailwind CSS for styling
-- Shadcn/ui for components
-- TMDb API for movie and series data
-- Vite for build and development
+React 18 + TypeScript (strict), Vite, Tailwind CSS, shadcn/ui (Radix), TanStack Query, Vitest + Testing Library.
 
 ## Setup
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Run the project: `npm run dev`
+1. Install dependencies: `npm install`
+2. Get TMDb credentials at <https://www.themoviedb.org/settings/api>
+3. Copy `.env.example` to `.env.local` and fill in **one** of:
+   - `VITE_TMDB_READ_TOKEN`: the v4 *API Read Access Token* (sent as a Bearer header; preferred)
+   - `VITE_TMDB_API_KEY`: the v3 *API Key* (sent as a query parameter)
+4. Run: `npm run dev`
 
-The application is already configured with a TMDb API key for immediate use.
+> Vite inlines `VITE_*` variables into the client bundle, so the credentials are visible to anyone using the deployed site. TMDb keys are free and read-only, but don't reuse one that has other permissions.
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript check (strict) |
+| `npm test` | Unit and component tests |
+
+## Project structure
+
+```
+src/
+  components/      UI (filters, content card, skeletons) + shadcn primitives in ui/
+  hooks/           useSuggestion: request lifecycle, cancellation, shown history
+  i18n/            PT/EN messages, provider and useI18n hook
+  lib/             persistence (URL + localStorage), utils
+  services/tmdb/   client, types, discover, suggestions (pool), details
+```
 
 ## Deployment
 
-This project is set up for automatic deployment to GitHub Pages via GitHub Actions.
+Pushes to `main` run lint, type check and tests, then build and deploy to GitHub Pages: <https://rubenaraujo.github.io/project_lumiere/>. Pull requests run the checks and a build, without deploying.
 
-✅ **Status**: Deployment configured and working  
-🔄 **Trigger**: Automatic on push to main branch  
-🌐 **URL**: https://rubenaraujo.github.io/project_lumiere/
+Add the credentials as repository **secrets** (Settings → Secrets and variables → Actions): `VITE_TMDB_READ_TOKEN` and/or `VITE_TMDB_API_KEY`.
 
-### Manual deployment:
-1. Build the project: `npm run build`
-2. Deploy the `dist` folder to GitHub Pages
+## Credits
 
-## License
-
-This project was developed by Ruben Araujo.
-
-## Note about the API
-
-The application uses the TMDb API to fetch movie and series data. Data is retrieved directly from TMDb without being stored on a separate server.
+Developed by Ruben Araujo. Data provided by [The Movie Database (TMDb)](https://www.themoviedb.org/); this product uses the TMDb API but is not endorsed or certified by TMDb.

@@ -1,116 +1,87 @@
-import { useState } from "react";
-import { Button } from "./ui/button";
 import { Sparkles } from "lucide-react";
+import { DEFAULT_FILTERS, type ContentType, type Filters, type Genre } from "@/services/tmdb";
+import { useI18n } from "@/i18n";
+import { Button } from "./ui/button";
 import ContentTypeSelector from "./ContentTypeSelector";
 import AdvancedFilters from "./AdvancedFilters";
 
 interface FilterPanelProps {
-  onFiltersChange: (filters: any) => void;
+  filters: Filters;
+  onFiltersChange: (filters: Filters) => void;
   onGetSuggestion: () => void;
   isLoading: boolean;
-  availableGenres: { id: number; name: string; }[];
+  availableGenres: Genre[];
+  genresError?: boolean;
+  onRetryGenres?: () => void;
+  actionLabel?: string;
 }
 
-const FilterPanel = ({ onFiltersChange, onGetSuggestion, isLoading, availableGenres }: FilterPanelProps) => {
-  const [contentType, setContentType] = useState("movie");
-  const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
-  const [yearFrom, setYearFrom] = useState("");
-  const [yearTo, setYearTo] = useState("");
-  const [language, setLanguage] = useState("en");
-  const [minRating, setMinRating] = useState(8);
+const FilterPanel = ({
+  filters,
+  onFiltersChange,
+  onGetSuggestion,
+  isLoading,
+  availableGenres,
+  genresError = false,
+  onRetryGenres,
+  actionLabel,
+}: FilterPanelProps) => {
+  const { t } = useI18n();
 
-  const updateFilters = (type: string, genres: number[], from: string, to: string, lang: string, rating: number) => {
-    onFiltersChange({
-      contentType: type,
-      genres,
-      yearFrom: from,
-      yearTo: to,
-      language: lang,
-      minRating: rating
-    });
-  };
-
-  const handleReset = () => {
-    setContentType("movie");
-    setSelectedGenres([]);
-    setYearFrom("");
-    setYearTo("");
-    setLanguage("en");
-    setMinRating(8);
-    updateFilters("movie", [], "", "", "en", 8);
-  };
-
-  const handleContentTypeChange = (value: string) => {
-    setContentType(value);
-    // Clear selected genres when changing content type since genre IDs are different
-    setSelectedGenres([]);
-    updateFilters(value, [], yearFrom, yearTo, language, minRating);
+  const handleContentTypeChange = (contentType: ContentType) => {
+    // Genre IDs differ between movies and TV, so the selection is dropped.
+    onFiltersChange({ ...filters, contentType, genres: [] });
   };
 
   const handleGenreChange = (genreId: number, checked: boolean) => {
-    const newSelectedGenres = checked
-      ? [...selectedGenres, genreId]
-      : selectedGenres.filter(id => id !== genreId);
-
-    setSelectedGenres(newSelectedGenres);
-    updateFilters(contentType, newSelectedGenres, yearFrom, yearTo, language, minRating);
-  };
-
-  const handleYearRangeChange = (yearFromValue: number, yearToValue: number) => {
-    const fromStr = yearFromValue.toString();
-    const toStr = yearToValue.toString();
-    setYearFrom(fromStr);
-    setYearTo(toStr);
-    updateFilters(contentType, selectedGenres, fromStr, toStr, language, minRating);
-  };
-
-  const handleLanguageChange = (value: string) => {
-    setLanguage(value);
-    updateFilters(contentType, selectedGenres, yearFrom, yearTo, value, minRating);
-  };
-
-  const handleMinRatingChange = (value: number) => {
-    setMinRating(value);
-    updateFilters(contentType, selectedGenres, yearFrom, yearTo, language, value);
+    const genres = checked
+      ? [...filters.genres, genreId]
+      : filters.genres.filter((id) => id !== genreId);
+    onFiltersChange({ ...filters, genres });
   };
 
   return (
-    <div className="w-full max-w-md space-y-4">
-      {/* Content Type Selector - Outside filters */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Tipo de Conteúdo</label>
-        <ContentTypeSelector
-          value={contentType}
-          onChange={handleContentTypeChange}
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5">
+        <div className="space-y-2" role="group" aria-labelledby="content-type-label">
+          <span id="content-type-label" className="text-sm font-medium">
+            {t("filters.contentType")}
+          </span>
+          <ContentTypeSelector value={filters.contentType} onChange={handleContentTypeChange} />
+        </div>
+
+        <AdvancedFilters
+          selectedGenres={filters.genres}
+          yearFrom={filters.yearFrom}
+          yearTo={filters.yearTo}
+          language={filters.language}
+          minRating={filters.minRating}
+          availableGenres={availableGenres}
+          genresError={genresError}
+          onRetryGenres={onRetryGenres}
+          onGenreChange={handleGenreChange}
+          onYearRangeChange={(from, to) =>
+            onFiltersChange({ ...filters, yearFrom: String(from), yearTo: String(to) })
+          }
+          onLanguageChange={(language) => onFiltersChange({ ...filters, language })}
+          onMinRatingChange={(minRating) => onFiltersChange({ ...filters, minRating })}
+          onReset={() => onFiltersChange(DEFAULT_FILTERS)}
         />
       </div>
 
-      {/* Advanced Filters */}
-      <AdvancedFilters
-        selectedGenres={selectedGenres}
-        yearFrom={yearFrom}
-        yearTo={yearTo}
-        language={language}
-        minRating={minRating}
-        availableGenres={availableGenres}
-        onGenreChange={handleGenreChange}
-        onYearRangeChange={handleYearRangeChange}
-        onLanguageChange={handleLanguageChange}
-        onMinRatingChange={handleMinRatingChange}
-        onReset={handleReset}
-      />
-
-      {/* Suggestion Button - Hidden on mobile, visible on desktop */}
-      <Button
-        variant="spotlight"
-        size="lg"
-        className="w-full hidden lg:flex"
-        onClick={onGetSuggestion}
-        disabled={isLoading}
-      >
-        <Sparkles className="w-4 h-4 mr-2" />
-        {isLoading ? "A procurar..." : "Encontrar conteúdo"}
-      </Button>
+      <div className="border-t border-border p-5">
+        <Button
+          variant="spotlight"
+          size="lg"
+          className="w-full h-12 text-base"
+          onClick={onGetSuggestion}
+          disabled={isLoading}
+          title={t("action.shortcut")}
+        >
+          <Sparkles className="w-4 h-4" aria-hidden="true" />
+          {isLoading ? t("action.searching") : actionLabel ?? t("action.find")}
+        </Button>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearSuggestionPool,
   discoverContent,
@@ -6,7 +6,9 @@ import {
   getContentDetails,
   getGenres,
   getGenresForContentType,
+  getItemById,
   getRandomSuggestion,
+  getTrailerKey,
   getWatchProviders,
   type Filters,
 } from "./tmdb";
@@ -30,6 +32,70 @@ describe("tmdb service", () => {
   beforeEach(() => {
     clearSuggestionPool();
     vi.restoreAllMocks();
+    vi.stubEnv("VITE_TMDB_API_KEY", "test-key");
+    vi.stubEnv("VITE_TMDB_READ_TOKEN", "");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  describe("trailers and shared titles", () => {
+    it("prefers an official YouTube trailer over teasers and other sites", () => {
+      const key = getTrailerKey({
+        videos: {
+          results: [
+            { key: "vimeo", site: "Vimeo", type: "Trailer", official: true },
+            { key: "teaser", site: "YouTube", type: "Teaser" },
+            { key: "fan", site: "YouTube", type: "Trailer" },
+            { key: "official", site: "YouTube", type: "Trailer", official: true },
+          ],
+        },
+      });
+      expect(key).toBe("official");
+      expect(getTrailerKey({})).toBeNull();
+    });
+
+    it("loads a title by id and converts genres to genre_ids", async () => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        jsonResponse({ id: 5, name: "Show", genres: [{ id: 18, name: "Drama" }] }) as Response
+      );
+
+      const item = await getItemById("tv", 5);
+
+      expect(item).toMatchObject({ id: 5, title: "Show", genre_ids: [18] });
+    });
+  });
+
+  describe("credentials", () => {
+    it("sends the v3 API key as a query param when no read token is set", async () => {
+      const fetchMock = vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse({ genres: [] }) as Response);
+
+      await getGenres("movie");
+
+      const requestedUrl = new URL(fetchMock.mock.calls[0][0] as string);
+      expect(requestedUrl.searchParams.get("api_key")).toBe("test-key");
+      expect(fetchMock.mock.calls[0][1]?.headers).toBeUndefined();
+    });
+
+    it("prefers the Bearer read token and keeps the key out of the URL", async () => {
+      vi.stubEnv("VITE_TMDB_READ_TOKEN", "secret-token");
+      const fetchMock = vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse({ genres: [] }) as Response);
+
+      await getGenres("movie");
+
+      const requestedUrl = new URL(fetchMock.mock.calls[0][0] as string);
+      expect(requestedUrl.searchParams.has("api_key")).toBe(false);
+      expect(fetchMock.mock.calls[0][1]?.headers).toEqual({ Authorization: "Bearer secret-token" });
+    });
+
+    it("fails without calling the API when no credentials are configured", async () => {
+      vi.stubEnv("VITE_TMDB_API_KEY", "");
+      const fetchMock = vi.spyOn(global, "fetch");
+
+      await expect(getGenres("movie")).rejects.toThrow("credentials are missing");
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
   });
 
   describe("getGenres", () => {
@@ -159,7 +225,7 @@ describe("tmdb service", () => {
 
       const requestedUrl = new URL(fetchMock.mock.calls[0][0] as string);
       expect(requestedUrl.pathname).toBe("/3/movie/1");
-      expect(requestedUrl.searchParams.get("append_to_response")).toBe("credits,watch/providers");
+      expect(requestedUrl.searchParams.get("append_to_response")).toBe("credits,watch/providers,external_ids,videos");
       // Regression test: a duplicated 'language' param previously caused
       // TMDb to respond with a 400 "Invalid parameters" error.
       expect(requestedUrl.searchParams.getAll("language")).toEqual(["pt-PT"]);
@@ -195,12 +261,33 @@ describe("tmdb service", () => {
       expect(suggestion?.id).toBe(2);
     });
 
-    it("returns null instead of throwing when the request fails", async () => {
+    it("rejects when the request fails so callers can tell errors from empty results", async () => {
       vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse({}, false, 500) as Response);
 
+      await expect(getRandomSuggestion(baseFilters, [])).rejects.toThrow("TMDb API error: 500");
+    });
+
+    it("returns null when nothing matches the filters", async () => {
+      vi.spyOn(global, "fetch").mockResolvedValue(
+        jsonResponse({ results: [], total_pages: 0, total_results: 0 }) as Response
+      );
+
+      await expect(getRandomSuggestion(baseFilters, [])).resolves.toBeNull();
+    });
+
+    it("can be retried after a failed attempt", async () => {
+      const fetchMock = vi
+        .spyOn(global, "fetch")
+        .mockResolvedValueOnce(jsonResponse({}, false, 500) as Response)
+        .mockResolvedValue(
+          jsonResponse({ results: [{ id: 7, title: "G", genre_ids: [] }], total_pages: 1, total_results: 1 }) as Response
+        );
+
+      await expect(getRandomSuggestion(baseFilters, [])).rejects.toThrow();
       const suggestion = await getRandomSuggestion(baseFilters, []);
 
-      expect(suggestion).toBeNull();
+      expect(suggestion?.id).toBe(7);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     it("resolves with the first page without waiting for subsequent pages to finish loading", async () => {

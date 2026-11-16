@@ -1,14 +1,16 @@
+import { useI18n } from "@/i18n";
+
 const Footer = () => {
+  const { t } = useI18n();
+
   return (
     <footer className="mt-auto border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-6">
         <div className="text-center text-sm text-muted-foreground">
           <p>
-            desenvolvido por <span className="text-primary font-medium">Ruben Araujo</span>
+            {t("footer.developedBy")} <span className="text-primary font-medium">Ruben Araujo</span>
           </p>
-          <p className="mt-2 text-xs">
-            Dados fornecidos por The Movie Database (TMDb)
-          </p>
+          <p className="mt-2 text-xs">{t("footer.tmdb")}</p>
         </div>
       </div>
     </footer>

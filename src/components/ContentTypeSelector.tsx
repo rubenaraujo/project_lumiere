@@ -1,38 +1,40 @@
-import { Button } from "./ui/button";
 import { Film, Tv, Clock } from "lucide-react";
+import type { ContentType } from "@/services/tmdb";
+import { useI18n, type MessageKey } from "@/i18n";
 
 interface ContentTypeSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: ContentType;
+  onChange: (value: ContentType) => void;
 }
 
+const options: { value: ContentType; labelKey: MessageKey; icon: typeof Film }[] = [
+  { value: "movie", labelKey: "type.movie", icon: Film },
+  { value: "tv", labelKey: "type.tv", icon: Tv },
+  { value: "miniseries", labelKey: "type.miniseries", icon: Clock },
+];
+
 const ContentTypeSelector = ({ value, onChange }: ContentTypeSelectorProps) => {
-  const options = [
-    { value: "movie", label: "Filmes", icon: Film },
-    { value: "tv", label: "Séries", icon: Tv },
-    { value: "miniseries", label: "Minisséries", icon: Clock },
-  ];
+  const { t } = useI18n();
 
   return (
-    <div className="flex gap-1 p-1 bg-muted rounded-lg">
-      {options.map((option) => {
-        const Icon = option.icon;
-        const isSelected = value === option.value;
+    <div className="grid grid-cols-3 gap-1 p-1 bg-muted rounded-xl">
+      {options.map(({ value: optionValue, labelKey, icon: Icon }) => {
+        const isSelected = value === optionValue;
         return (
-          <Button
-            key={option.value}
-            variant={isSelected ? "default" : "ghost"}
-            size="sm"
-            onClick={() => onChange(option.value)}
-            className={`flex-1 gap-2 transition-colors ${
-              isSelected 
-                ? "bg-primary text-primary-foreground shadow-sm" 
-                : "hover:bg-muted-foreground/10"
+          <button
+            key={optionValue}
+            type="button"
+            aria-pressed={isSelected}
+            onClick={() => onChange(optionValue)}
+            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-smooth active:scale-95 ${
+              isSelected
+                ? "bg-primary text-primary-foreground shadow-soft"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
             }`}
           >
-            <Icon className="w-4 h-4" />
-            {option.label}
-          </Button>
+            <Icon className="w-5 h-5" aria-hidden="true" />
+            {t(labelKey)}
+          </button>
         );
       })}
     </div>
