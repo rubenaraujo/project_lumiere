@@ -18,7 +18,7 @@ All colors MUST be HSL.
     --popover: 220 13% 12%;
     --popover-foreground: 45 100% 95%;
 
-    --primary: 45 100% 65%;
+    --primary: 37 47% 91%;
     --primary-foreground: 220 13% 8%;
 
     --secondary: 220 13% 18%;
@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --muted: 220 13% 15%;
     --muted-foreground: 45 10% 70%;
 
-    --accent: 35 100% 60%;
+    --accent: 37 40% 78%;
     --accent-foreground: 220 13% 8%;
 
     --destructive: 0 84% 65%;
@@ -35,16 +35,16 @@ All colors MUST be HSL.
 
     --border: 220 13% 20%;
     --input: 220 13% 18%;
-    --ring: 45 100% 65%;
+    --ring: 37 47% 91%;
 
     --radius: 0.75rem;
 
     /* Custom cinema colors */
-    --gold: 45 100% 65%;
-    --gold-muted: 45 100% 55%;
+    --gold: 37 47% 91%;
+    --gold-muted: 37 30% 75%;
     --cinema-dark: 220 13% 5%;
     --cinema-darker: 220 13% 3%;
-    --spotlight: 50 100% 80%;
+    --spotlight: 37 60% 95%;
     
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
